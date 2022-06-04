@@ -3,4 +3,4 @@ This repository is a collection of configs for tools I might want to reuse on di
 
 # How do I use this?
 
-WIP at the moment.
+For now, just copy the corresponding configs to your `~/.config/` directory.
