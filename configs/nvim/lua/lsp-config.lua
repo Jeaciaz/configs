@@ -2,6 +2,8 @@ local lspconfig = require("lspconfig")
 local null_ls = require("null-ls")
 local cmp = require("cmp")
 
+local newbiz_path = "~/arcadia/taxi/frontend/services/newbiz-logistics-frontend"
+
 local buf_map = function(bufnr, mode, lhs, rhs, opts)
   vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts or { silent = true })
 end
@@ -48,6 +50,31 @@ cmp.setup.cmdline('/', {
 
 local cmp_capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
+local telescope_file_search = function ()
+	require'telescope.builtin'.live_grep {
+		search_dirs = {
+			newbiz_path .. '/packages',
+			newbiz_path .. '/services'
+		}
+	}
+end
+
+local telescope_arc_status = function ()
+	require'telescope'.extensions.arc.status {
+		preview_cmd = {
+			staged = "arc diff --git --cached %s | delta --pager='less -SR'",
+		  unstaged = "arc diff --git %s | delta --pager='less -SR'",
+			untracked = "cat"
+		}
+	}
+end
+
+local telescope_arc_commits = function ()
+	require'telescope'.extensions.arc.commits {
+		preview_cmd = "arc show --git %s | delta --pager='less -SR'"
+	}
+end
+
 local on_attach = function(client, bufnr)
     vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
     vim.cmd("command! LspCodeAction lua vim.lsp.buf.code_action()")
@@ -75,6 +102,12 @@ local on_attach = function(client, bufnr)
     buf_map(bufnr, "n", "gd", ":Telescope lsp_definitions<CR>")
     buf_map(bufnr, "n", "gy", ":Telescope lsp_type_definitions<CR>")
 		buf_map(bufnr, "n", "gr", ":Telescope lsp_references<CR>")
+		buf_map(bufnr, "n", "<Leader>ff", ":Telescope find_files<CR>")
+		buf_map(bufnr, "n", "<Leader>fs", "", { callback = telescope_file_search })
+		buf_map(bufnr, "n", "<Leader>fb", ":Telescope buffers<CR>")
+		buf_map(bufnr, "n", "<Leader>bg", ":Telescope current_buffer_fuzzy_find<CR>")
+		buf_map(bufnr, "n", "<Leader>as", "", { callback = telescope_arc_status })
+		buf_map(bufnr, "n", "<Leader>ac", "", { callback = telescope_arc_commits })
 
     if client.resolved_capabilities.document_formatting then
         vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")

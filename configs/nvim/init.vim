@@ -5,6 +5,7 @@
 :set shiftwidth=2
 :set smarttab
 :set softtabstop=2
+set termguicolors
 set clipboard+=unnamedplus
 
 call plug#begin()
@@ -12,6 +13,7 @@ call plug#begin()
 Plug 'tpope/vim-surround' " Surrounding ysw)
 Plug 'preservim/nerdtree' " NerdTree
 Plug 'tpope/vim-commentary' " For Commenting gcc & gc
+Plug 'JoosepAlviste/nvim-ts-context-commentstring' " Contextual comments
 Plug 'vim-airline/vim-airline' " Status bar
 Plug 'vim-airline/vim-airline-themes' " Status bar theme
 Plug 'ryanoasis/vim-devicons' " Developer Icons
@@ -25,8 +27,11 @@ Plug 'jose-elias-alvarez/nvim-lsp-ts-utils' " Typescript utils for imports & suc
 Plug 'jiangmiao/auto-pairs' " Auto bracket opening/closing
 Plug 'hrsh7th/nvim-cmp' " Autocompletion
 Plug 'nvim-telescope/telescope.nvim' " Fuzzy navigation
-Plug 'nvim-treesitter/nvim-treesitter' " Treesitter
-
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'} " Treesitter
+Plug 'ellisonleao/gruvbox.nvim' " Gruvbox theme
+Plug '~/arcadia/junk/moonw1nd/lua/telescope-arc.nvim' " Arc Telescope integration
+Plug '~/arcadia/junk/kuzns/gitsigns.nvim_with_arc_support' " Arc gitsigns port
+Plug 'akinsho/git-conflict.nvim' " Conflict highlight
 " Utils for nvim-cmp
 Plug 'hrsh7th/cmp-vsnip' 
 Plug 'hrsh7th/vim-vsnip'
@@ -40,19 +45,24 @@ set encoding=UTF-8
 
 call plug#end()
 
+set background=light
+colorscheme gruvbox
+
 lua require("lsp-config")
+
+" Keybindings
+let mapleader = "\<Space>"
 
 nnoremap <C-f> :NERDTreeFind<CR>
 nnoremap <C-n> :NERDTree<CR>
 nnoremap <C-t> :NERDTreeToggle<CR>
 nnoremap <Leader>b :ls<CR>:b<Space>
+nnoremap <Leader>h :noh<CR>
 
 nmap <F8> :TagbarToggle<CR>
 
 inoremap jk <Esc>
 inoremap kj <Esc>
-
-vnoremap <C-c> "+y
 
 " NERDTree config
 let g:NERDTreeDirArrowExpandable="+"
@@ -75,16 +85,44 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_nr_show = 1
 let g:airline_theme='sol'
 
-" Telescope config
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>gf <cmd>Telescope current_buffer_fuzzy_find<cr>
-
 lua << EOF
-require('telescope').setup {
+require'telescope'.setup {
 	defaults = {
-		file_ignore_patterns = {"node_modules"}
+		file_ignore_patterns = {"node_modules", "lock%.json"},
+		initial_mode = "normal",
+		scroll_strategy = "limit",
 	}
 }
+
+require'telescope'.load_extension'arc'
+
+vim.diagnostic.config {
+	virtual_text = {
+		source = true
+	},
+severity_sort = true
+}
+
+require'nvim-treesitter.configs'.setup {
+	ensure_installed = { "typescript", "tsx" },
+	context_commentstring = {
+		enable = true
+	},
+	hightlight = {
+		enable = true,
+		additional_vim_regex_highlighting = false,
+	},
+}
+
+require'gitsigns'.setup {
+	signs = {
+    add          = {hl = 'GitSignsAdd'   , text = '◨', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'},
+    change       = {hl = '#00f', text = '◨', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+    delete       = {hl = 'GitSignsDelete', text = '_', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+    topdelete    = {hl = 'GitSignsDelete', text = '‾', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+    changedelete = {hl = 'GitSignsChange', text = '~', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+  },
+}
+
+require'git-conflict'.setup()
 EOF
