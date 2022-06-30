@@ -8,30 +8,33 @@
 set termguicolors
 set clipboard+=unnamedplus
 
+lang ru_RU
+
 call plug#begin()
 
 Plug 'tpope/vim-surround' " Surrounding ysw)
-Plug 'preservim/nerdtree' " NerdTree
 Plug 'tpope/vim-commentary' " For Commenting gcc & gc
 Plug 'JoosepAlviste/nvim-ts-context-commentstring' " Contextual comments
-Plug 'vim-airline/vim-airline' " Status bar
-Plug 'vim-airline/vim-airline-themes' " Status bar theme
-Plug 'ryanoasis/vim-devicons' " Developer Icons
-Plug 'tc50cal/vim-terminal' " Vim Terminal
-Plug 'preservim/tagbar' " Tagbar for code navigation
-Plug 'mg979/vim-visual-multi' " CTRL + N for multiple cursors
+  Plug 'vim-airline/vim-airline' " Status bar
+  Plug 'vim-airline/vim-airline-themes' " Status bar theme
 Plug 'nvim-lua/plenary.nvim' " Utils for null-ls
-Plug 'neovim/nvim-lspconfig' " LSP Config for the lua script below
+Plug 'neovim/nvim-lspconfig' " LSP Config 
 Plug 'jose-elias-alvarez/null-ls.nvim' " Diagnostic tools
 Plug 'jose-elias-alvarez/nvim-lsp-ts-utils' " Typescript utils for imports & such
 Plug 'jiangmiao/auto-pairs' " Auto bracket opening/closing
 Plug 'hrsh7th/nvim-cmp' " Autocompletion
-Plug 'nvim-telescope/telescope.nvim' " Fuzzy navigation
+Plug 'nvim-telescope/telescope.nvim' " Telescope
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'} " Treesitter
 Plug 'ellisonleao/gruvbox.nvim' " Gruvbox theme
 Plug '~/arcadia/junk/moonw1nd/lua/telescope-arc.nvim' " Arc Telescope integration
 Plug '~/arcadia/junk/kuzns/gitsigns.nvim_with_arc_support' " Arc gitsigns port
-Plug 'akinsho/git-conflict.nvim' " Conflict highlight
+Plug 'editorconfig/editorconfig-vim' " Editorconfig
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+" Plug 'luukvbaal/nnn.nvim' " nnn integration
+Plug 'kyazdani42/nvim-web-devicons' " icons for nvim-tree
+Plug 'kyazdani42/nvim-tree.lua' " file explorer
+Plug 'kevinhwang91/rnvimr' " file picker
+
 " Utils for nvim-cmp
 Plug 'hrsh7th/cmp-vsnip' 
 Plug 'hrsh7th/vim-vsnip'
@@ -45,24 +48,31 @@ set encoding=UTF-8
 
 call plug#end()
 
-set background=light
-colorscheme gruvbox
+" source $HOME/.config/nvim/plug/nnn.vim
+source $HOME/.config/nvim/plug/nvim-tree.vim
+source $HOME/.config/nvim/plug/rnvimr.vim
 
 lua require("lsp-config")
 
-" Keybindings
-let mapleader = "\<Space>"
+set background=light
+colorscheme gruvbox
 
-nnoremap <C-f> :NERDTreeFind<CR>
-nnoremap <C-n> :NERDTree<CR>
-nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <Leader>b :ls<CR>:b<Space>
+" Keybindings
+let mapleader = "§"
+
 nnoremap <Leader>h :noh<CR>
+noremap gG G
+nnoremap <A-j> ddp
+nnoremap <A-k> ddP
 
 nmap <F8> :TagbarToggle<CR>
 
 inoremap jk <Esc>
 inoremap kj <Esc>
+inoremap ∆ <Down>
+inoremap ˚ <Up>
+inoremap ˙ <Left>
+inoremap ¬ <Right>
 
 " NERDTree config
 let g:NERDTreeDirArrowExpandable="+"
@@ -91,10 +101,18 @@ require'telescope'.setup {
 		file_ignore_patterns = {"node_modules", "lock%.json"},
 		initial_mode = "normal",
 		scroll_strategy = "limit",
+	},
+	extensions = {
+		fzf = {
+			fuzzy = true,
+			override_generic_sorter = true,
+			override_file_sorter = true,
+		}
 	}
 }
 
 require'telescope'.load_extension'arc'
+require'telescope'.load_extension'fzf'
 
 vim.diagnostic.config {
 	virtual_text = {
@@ -108,7 +126,7 @@ require'nvim-treesitter.configs'.setup {
 	context_commentstring = {
 		enable = true
 	},
-	hightlight = {
+	highlight = {
 		enable = true,
 		additional_vim_regex_highlighting = false,
 	},
@@ -123,6 +141,4 @@ require'gitsigns'.setup {
     changedelete = {hl = 'GitSignsChange', text = '~', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
   },
 }
-
-require'git-conflict'.setup()
 EOF
